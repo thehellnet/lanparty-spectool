@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,7 +12,7 @@ using log4net.Core;
 
 namespace LanPartySpecTool.windows
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         private const int MaxLogLines = 100;
 
@@ -70,8 +69,7 @@ namespace LanPartySpecTool.windows
 
         private void UpdateAgentStatus(bool status)
         {
-            AgentStatusValue.Dispatcher.Invoke(DispatcherPriority.Normal,
-                new Action(() => { AgentStatusValue.Text = status ? "Running" : "Stop"; }));
+            AgentStatusValue.Dispatcher.Invoke(() => AgentStatusValue.Text = status ? "Running" : "Stop");
         }
 
         private void NewLogEvent(Level level, string message)
@@ -107,32 +105,37 @@ namespace LanPartySpecTool.windows
 
             _logList.Add(logItem);
             while (_logList.Count > MaxLogLines) _logList.RemoveAt(0);
+            var newLogList = _logList.ToArray();
 
-            Task.Factory.StartNew(() =>
+            LogText.Dispatcher.Invoke(() => UpdateLogText(newLogList));
+        }
+
+        private void UpdateLogText(IEnumerable<dynamic> newLogList)
+        {
+            var paragraph = new Paragraph();
+
+            foreach (var log in newLogList)
             {
-                LogText.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() =>
+                var textBlock = new TextBlock
                 {
-                    var paragraph = new Paragraph();
-                    foreach (var log in _logList)
-                    {
-                        paragraph.Inlines.Add(new TextBlock
-                        {
-                            FontFamily = new FontFamily("Courier New"),
-                            Margin = new Thickness(0),
-                            Foreground = log.color,
-                            FontWeight = log.weight,
-                            FontStyle = log.style,
-                            Text = log.message
-                        });
-                        paragraph.Inlines.Add(new LineBreak());
-                    }
+                    FontFamily = new FontFamily("Courier New"),
+                    Margin = new Thickness(0),
+                    Foreground = log.color,
+                    FontWeight = log.weight,
+                    FontStyle = log.style,
+                    Text = log.message
+                };
 
-                    var document = new FlowDocument(paragraph);
+                paragraph.Inlines.Add(textBlock);
 
-                    LogText.Document = document;
-                    LogText.ScrollToEnd();
-                }));
-            });
+                var lineBreak = new LineBreak();
+                paragraph.Inlines.Add(lineBreak);
+            }
+
+            var document = new FlowDocument(paragraph);
+
+            LogText.Document = document;
+            LogText.ScrollToEnd();
         }
     }
 }
