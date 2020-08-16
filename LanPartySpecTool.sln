@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanPartySpecTool", "LanPartySpecTool\LanPartySpecTool.csproj", "{3BB54C8F-338D-4457-8ABE-0CB2E458C28A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanPartySpecToolTests", "LanPartySpecToolTests\LanPartySpecToolTests.csproj", "{FBAF9F29-8CB2-4D38-989D-D90422D695CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{3BB54C8F-338D-4457-8ABE-0CB2E458C28A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BB54C8F-338D-4457-8ABE-0CB2E458C28A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BB54C8F-338D-4457-8ABE-0CB2E458C28A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBAF9F29-8CB2-4D38-989D-D90422D695CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBAF9F29-8CB2-4D38-989D-D90422D695CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBAF9F29-8CB2-4D38-989D-D90422D695CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBAF9F29-8CB2-4D38-989D-D90422D695CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
