@@ -24,7 +24,9 @@ namespace LanPartySpecTool.utility
         [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual void Start()
         {
-            StartThread();
+            _keepRunning = true;
+            _thread = new Thread(Loop);
+            _thread.Start();
 
             OnStart?.Invoke();
         }
@@ -32,9 +34,9 @@ namespace LanPartySpecTool.utility
         [MethodImpl(MethodImplOptions.Synchronized)]
         public virtual void Stop()
         {
-            StopThread();
-
-            OnStop?.Invoke();
+            StopJob();
+            _thread.Join();
+            _thread = null;
         }
 
         public void Join()
@@ -54,26 +56,27 @@ namespace LanPartySpecTool.utility
             }
         }
 
-        private void StartThread()
-        {
-            _keepRunning = true;
-            _thread = new Thread(Loop);
-            _thread.Start();
-        }
-
-        private void StopThread()
+        protected void StopJob()
         {
             _keepRunning = false;
-            _thread.Join();
-            _thread = null;
         }
+
 
         private void Loop()
         {
-            while (_keepRunning)
+            try
             {
-                Job();
+                while (_keepRunning)
+                {
+                    Job();
+                }
             }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
+
+            OnStop?.Invoke();
         }
 
         protected abstract void Job();
