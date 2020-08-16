@@ -41,6 +41,11 @@
       <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -53,7 +58,15 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="agent\Agent.cs" />
+    <Compile Include="agent\SocketClient.cs" />
+    <Compile Include="config\Configuration.cs" />
+    <Compile Include="config\Defaults.cs" />
     <Compile Include="LanPartySpecTool.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="protocol\Command.cs" />
+    <Compile Include="protocol\CommandAction.cs" />
+    <Compile Include="utility\StoppableThread.cs" />
     <Compile Include="windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>

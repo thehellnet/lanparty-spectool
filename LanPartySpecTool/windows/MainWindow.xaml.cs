@@ -1,19 +1,45 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Media;
 using System.Windows.Threading;
+using LanPartySpecTool.config;
+using log4net.Core;
 
 namespace LanPartySpecTool.windows
 {
     public partial class MainWindow : Window
     {
-        private readonly DispatcherTimer _clockTimer = new DispatcherTimer();
+        private const int MaxLogLines = 100;
 
-        public MainWindow()
+        private readonly Configuration _configuration;
+        private readonly DispatcherTimer _clockTimer = new DispatcherTimer();
+        private readonly List<dynamic> _logList = new List<dynamic>();
+
+        public MainWindow(Configuration configuration)
         {
+            _configuration = configuration;
+
             InitializeComponent();
+
             InitUi();
 
             UpdateClock();
+        }
+
+        public void OnAgentStart()
+        {
+            UpdateAgentStatus(true);
+        }
+
+        public void OnAgentStop()
+        {
+            UpdateAgentStatus(false);
         }
 
         private void InitUi()
@@ -23,11 +49,90 @@ namespace LanPartySpecTool.windows
             _clockTimer.Tick += (sender, args) => UpdateClock();
             _clockTimer.Interval = TimeSpan.FromSeconds(1);
             _clockTimer.Start();
+
+            SocketPortValue.Text = _configuration.Port.ToString();
+            SocketPortValue.SetBinding(TextBox.TextProperty, new Binding
+            {
+                Path = new PropertyPath("Port"),
+                Source = _configuration,
+                Mode = BindingMode.OneWay
+            });
+
+            UpdateAgentStatus(false);
+
+            LogEvent.OnLogEvent += NewLogEvent;
         }
 
         private void UpdateClock()
         {
             ClockText.Text = $"{DateTime.Now}";
+        }
+
+        private void UpdateAgentStatus(bool status)
+        {
+            AgentStatusValue.Dispatcher.Invoke(DispatcherPriority.Normal,
+                new Action(() => { AgentStatusValue.Text = status ? "Running" : "Stop"; }));
+        }
+
+        private void NewLogEvent(Level level, string message)
+        {
+            var color = Brushes.Gray;
+            var weight = FontWeights.Normal;
+            var style = FontStyles.Italic;
+
+            if (level == Level.Error)
+            {
+                color = Brushes.Red;
+                weight = FontWeights.Bold;
+                style = FontStyles.Normal;
+            }
+            else if (level == Level.Warn)
+            {
+                color = Brushes.Orange;
+                weight = FontWeights.Normal;
+                style = FontStyles.Normal;
+            }
+            else if (level == Level.Info)
+            {
+                color = Brushes.Black;
+                weight = FontWeights.Normal;
+                style = FontStyles.Normal;
+            }
+
+            dynamic logItem = new ExpandoObject();
+            logItem.color = color;
+            logItem.weight = weight;
+            logItem.style = style;
+            logItem.message = message.Trim();
+
+            _logList.Add(logItem);
+            while (_logList.Count > MaxLogLines) _logList.RemoveAt(0);
+
+            Task.Factory.StartNew(() =>
+            {
+                LogText.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() =>
+                {
+                    var paragraph = new Paragraph();
+                    foreach (var log in _logList)
+                    {
+                        paragraph.Inlines.Add(new TextBlock
+                        {
+                            FontFamily = new FontFamily("Courier New"),
+                            Margin = new Thickness(0),
+                            Foreground = log.color,
+                            FontWeight = log.weight,
+                            FontStyle = log.style,
+                            Text = log.message
+                        });
+                        paragraph.Inlines.Add(new LineBreak());
+                    }
+
+                    var document = new FlowDocument(paragraph);
+
+                    LogText.Document = document;
+                    LogText.ScrollToEnd();
+                }));
+            });
         }
     }
 }

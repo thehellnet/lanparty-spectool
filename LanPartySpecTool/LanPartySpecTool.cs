@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows;
+using LanPartySpecTool.agent;
+using LanPartySpecTool.config;
 using LanPartySpecTool.windows;
 using log4net;
 
@@ -9,7 +11,9 @@ namespace LanPartySpecTool
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LanPartySpecTool));
 
-        private readonly MainWindow _mainWindow = new MainWindow();
+        private Configuration _configuration;
+        private Agent _agent;
+        private MainWindow _mainWindow;
 
         [STAThread]
         public static void Main()
@@ -32,14 +36,40 @@ namespace LanPartySpecTool
         {
             base.OnStartup(e);
 
+            Logger.Info("Application START");
+
+            _configuration = new Configuration();
+            _agent = new Agent(_configuration);
+            _mainWindow = new MainWindow(_configuration);
+
+            _agent.OnAgentStart += OnAgentStart;
+            _agent.OnAgentStop += OnAgentStop;
+
+            _agent.Start();
             _mainWindow.Show();
+
+            _configuration.Load();
+            _configuration.Save();
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             _mainWindow.Close();
+            _agent.Stop();
+
+            Logger.Info("Application END");
 
             base.OnExit(e);
+        }
+
+        private void OnAgentStart()
+        {
+            _mainWindow.OnAgentStart();
+        }
+
+        private void OnAgentStop()
+        {
+            _mainWindow.OnAgentStop();
         }
     }
 }
