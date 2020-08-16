@@ -30,7 +30,7 @@ namespace LanPartySpecTool.agent
                     break;
 
                 case CommandAction.SetReady:
-                    JoinSpectate();
+                    SetReady();
                     break;
 
                 case CommandAction.NextPlayer:
