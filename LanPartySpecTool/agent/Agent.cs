@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using LanPartySpecTool.config;
 using LanPartySpecTool.protocol;
 using log4net;
@@ -31,43 +32,37 @@ namespace LanPartySpecTool.agent
         private ulong _id;
         private readonly Dictionary<ulong, SocketClient> _clients = new Dictionary<ulong, SocketClient>();
 
+        private Executor _executor;
+
         public Agent(Configuration configuration)
         {
             _configuration = configuration;
+            _executor = new Executor(_configuration);
         }
 
         public void Start()
         {
-            new Thread(() =>
+            lock (_sync)
             {
-                lock (_sync)
-                {
-                    StartAgent();
-                }
-            }).Start();
+                StartAgent();
+            }
         }
 
         public void Stop()
         {
-            new Thread(() =>
+            lock (_sync)
             {
-                lock (_sync)
-                {
-                    StopAgent();
-                }
-            }).Start();
+                StopAgent();
+            }
         }
 
         public void Restart()
         {
-            new Thread(() =>
+            lock (_sync)
             {
-                lock (_sync)
-                {
-                    StopAgent();
-                    StartAgent();
-                }
-            }).Start();
+                StopAgent();
+                StartAgent();
+            }
         }
 
         private void StartAgent()
@@ -119,18 +114,21 @@ namespace LanPartySpecTool.agent
 
             _socketKeepRunning = true;
 
-            _socketThread = new Thread(() =>
+            _socketThread = new Thread(SocketLoop);
+            _socketThread.Start();
+        }
+
+        private void SocketLoop()
+        {
+            while (_socketKeepRunning)
             {
-                while (_socketKeepRunning)
-                {
-                    Logger.Debug("Socket waiting for connections");
+                Logger.Debug("Socket waiting for connections");
 
-                    var newSocket = _socket.Accept();
-                    CreateClient(_id, newSocket);
+                var newSocket = _socket.Accept();
+                CreateClient(_id, newSocket);
 
-                    _id++;
-                }
-            });
+                _id++;
+            }
         }
 
         private void StopSocket()
@@ -176,6 +174,7 @@ namespace LanPartySpecTool.agent
         {
             var socketClient = new SocketClient(clientId, newSocket);
             socketClient.OnNewCommand += HandleNewCommand;
+            socketClient.OnClientStop += HandleOnClientStop;
             _clients.Add(_id, socketClient);
             socketClient.Start();
         }
@@ -196,7 +195,13 @@ namespace LanPartySpecTool.agent
 
         private void HandleNewCommand(ulong clientId, Command command)
         {
-            Logger.Info($"Received command from client ${clientId}");
+            Logger.Info($"Received command from client {clientId}");
+            _executor.ExecuteCommand(clientId, command);
+        }
+
+        private void HandleOnClientStop(ulong clientId)
+        {
+            Task.Run(() => { DestroyClient(clientId); });
         }
     }
 }
