@@ -2,7 +2,8 @@
 {
     public enum CommandAction
     {
-        JOIN_SPECTATE,
-        NEXT_PLAYER
+        JoinSpectate,
+        SetReady,
+        NextPlayer
     }
 }
