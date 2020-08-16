@@ -32,7 +32,7 @@ namespace LanPartySpecTool.agent
 
         public override void Start()
         {
-            Logger.Info($"Starting socket client {_id}");
+            Logger.Info($"Starting socket client {_id} from {_socket.RemoteEndPoint}");
 
             base.Start();
         }
@@ -41,7 +41,9 @@ namespace LanPartySpecTool.agent
         {
             Logger.Info($"Stop socket client {_id}");
 
-            _socket.Close();
+            _socket.Shutdown(SocketShutdown.Both);
+            _socket.Disconnect(false);
+            _socket.Close(10);
 
             base.Stop();
         }
@@ -77,12 +79,19 @@ namespace LanPartySpecTool.agent
             {
                 bytesRead = _socket.Receive(buffer);
             }
-            catch (SocketException)
+            catch (Exception)
             {
                 StopJob();
                 return null;
             }
 
+            if (bytesRead <= 0)
+            {
+                StopJob();
+                return null;
+            }
+
+            Logger.Debug($"Read {bytesRead} bytes");
             var rawData = new char[bytesRead];
             Array.Copy(buffer, 0, rawData, 0, bytesRead);
             var data = new string(rawData);

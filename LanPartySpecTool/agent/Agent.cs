@@ -124,7 +124,16 @@ namespace LanPartySpecTool.agent
             {
                 Logger.Debug("Socket waiting for connections");
 
-                var newSocket = _socket.Accept();
+                Socket newSocket;
+                try
+                {
+                    newSocket = _socket.Accept();
+                }
+                catch (Exception)
+                {
+                    break;
+                }
+
                 CreateClient(_id, newSocket);
 
                 _id++;
@@ -136,6 +145,15 @@ namespace LanPartySpecTool.agent
             if (_socket == null)
             {
                 return;
+            }
+
+            try
+            {
+                _socket.Close();
+            }
+            catch (Exception)
+            {
+                // ignored
             }
 
             Logger.Debug("Stopping socket");
@@ -156,15 +174,6 @@ namespace LanPartySpecTool.agent
             foreach (var clientId in _clients.Keys)
             {
                 DestroyClient(clientId);
-            }
-
-            try
-            {
-                _socket.Close();
-            }
-            catch (Exception)
-            {
-                // ignored
             }
 
             _socket = null;
