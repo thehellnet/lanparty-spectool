@@ -1,4 +1,5 @@
-﻿using LanPartySpecTool.Annotations;
+﻿using System.Threading.Tasks;
+using LanPartySpecTool.Annotations;
 using log4net.Appender;
 using log4net.Core;
 
@@ -14,7 +15,7 @@ namespace LanPartySpecTool
         protected override void Append(LoggingEvent loggingEvent)
         {
             var message = RenderLoggingEvent(loggingEvent);
-            OnLogEvent?.Invoke(loggingEvent.Level, message);
+            Task.Run(() => { OnLogEvent?.Invoke(loggingEvent.Level, message); });
         }
     }
 }
