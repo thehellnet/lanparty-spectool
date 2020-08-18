@@ -12,7 +12,10 @@ namespace LanPartySpecTool
         private static readonly ILog Logger = LogManager.GetLogger(typeof(LanPartySpecTool));
 
         private Configuration _configuration;
+        private ConfigurationManager _configurationManager;
+
         private Agent _agent;
+
         private MainWindow _mainWindow;
 
         [STAThread]
@@ -39,17 +42,24 @@ namespace LanPartySpecTool
             Logger.Info("Application START");
 
             _configuration = new Configuration();
+            _configurationManager = new ConfigurationManager(_configuration);
+
             _agent = new Agent(_configuration);
+
             _mainWindow = new MainWindow(_configuration);
+
+            _configurationManager.Load();
+            _configurationManager.Init();
+
+            _configuration.PropertyChanged += (sender, args) => _configurationManager.Save();
+
+            _configurationManager.Save();
 
             _agent.OnAgentStart += OnAgentStart;
             _agent.OnAgentStop += OnAgentStop;
 
             _agent.Start();
             _mainWindow.Show();
-
-            _configuration.Load();
-            _configuration.Save();
         }
 
         protected override void OnExit(ExitEventArgs e)
