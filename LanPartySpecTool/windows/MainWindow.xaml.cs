@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,6 +9,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
 using LanPartySpecTool.config;
+using LanPartySpecTool.utility;
 using log4net.Core;
 
 namespace LanPartySpecTool.windows
@@ -49,12 +51,27 @@ namespace LanPartySpecTool.windows
             _clockTimer.Interval = TimeSpan.FromSeconds(1);
             _clockTimer.Start();
 
-            SocketPortValue.Text = _configuration.Port.ToString();
-            SocketPortValue.SetBinding(TextBox.TextProperty, new Binding
+            SocketPort.Text = _configuration.SocketPort.ToString();
+
+            ServerAddress.SetBinding(TextBox.TextProperty, new Binding
             {
-                Path = new PropertyPath("Port"),
+                Path = new PropertyPath("ServerAddress"),
                 Source = _configuration,
-                Mode = BindingMode.OneWay
+                Mode = BindingMode.TwoWay
+            });
+
+            ServerPort.SetBinding(TextBox.TextProperty, new Binding
+            {
+                Path = new PropertyPath("ServerPort"),
+                Source = _configuration,
+                Mode = BindingMode.TwoWay
+            });
+
+            GameExe.SetBinding(TextBox.TextProperty, new Binding
+            {
+                Path = new PropertyPath("GameExe"),
+                Source = _configuration,
+                Mode = BindingMode.TwoWay
             });
 
             UpdateAgentStatus(false);
@@ -69,7 +86,7 @@ namespace LanPartySpecTool.windows
 
         private void UpdateAgentStatus(bool status)
         {
-            AgentStatusValue.Dispatcher.Invoke(() => AgentStatusValue.Text = status ? "Running" : "Stop");
+            AgentStatus.Dispatcher.Invoke(() => AgentStatus.Text = status ? "Running" : "Stop");
         }
 
         private void NewLogEvent(Level level, string message)
@@ -107,7 +124,14 @@ namespace LanPartySpecTool.windows
             while (_logList.Count > MaxLogLines) _logList.RemoveAt(0);
             var newLogList = _logList.ToArray();
 
-            LogText.Dispatcher.Invoke(() => UpdateLogText(newLogList));
+            try
+            {
+                LogText.Dispatcher.Invoke(() => UpdateLogText(newLogList));
+            }
+            catch (TaskCanceledException)
+            {
+                //ignore
+            }
         }
 
         private void UpdateLogText(IEnumerable<dynamic> newLogList)
@@ -136,6 +160,29 @@ namespace LanPartySpecTool.windows
 
             LogText.Document = document;
             LogText.ScrollToEnd();
+        }
+
+        private void StartGameButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                GameUtility.LaunchGameClient(
+                    _configuration.GameExe,
+                    _configuration.ServerAddress,
+                    _configuration.ServerPort
+                );
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
+        }
+
+        private void ShowCodKeyButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var codKey = GameUtility.ReadCodKey();
+            var message = $"Key configured in registry: {GameUtility.FormatCodKey(codKey)}";
+            MessageBox.Show(message, "Configured key", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }

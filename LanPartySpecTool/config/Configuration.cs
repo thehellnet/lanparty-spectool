@@ -12,53 +12,59 @@ namespace LanPartySpecTool.config
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private const string ConfigFileName = "config.json";
-
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(Configuration));
-
-        private ushort _port = Defaults.Port;
+        private ushort _socketPort = Defaults.SocketPort;
+        private string _serverAddress = Defaults.ServerAddress;
+        private ushort _serverPort = Defaults.ServerPort;
+        private string _gameExe = Defaults.GameExe;
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public ushort Port
+        public ushort SocketPort
         {
-            get => _port;
+            get => _socketPort;
             set
             {
-                if (_port == value) return;
-                _port = value;
-                OnPropertyChanged(nameof(Port));
-                Save();
+                if (_socketPort == value) return;
+                _socketPort = value;
+                OnPropertyChanged(nameof(SocketPort));
             }
         }
 
-        public void Load()
+        public string ServerAddress
         {
-            Logger.Info("Loading configuration to file");
-
-            if (!File.Exists(ConfigFileName)) return;
-
-            var jsonString = File.ReadAllText(ConfigFileName);
-            var json = JObject.Parse(jsonString);
-
-            Port = (json.GetValue("port") ?? Defaults.Port).Value<ushort>();
+            get => _serverAddress;
+            set
+            {
+                if (_serverAddress == null || _serverAddress == value) return;
+                _serverAddress = value;
+                OnPropertyChanged(nameof(ServerAddress));
+            }
         }
 
-        public void Save()
+        public ushort ServerPort
         {
-            Logger.Info("Saving configuration from file");
-
-            var json = new
+            get => _serverPort;
+            set
             {
-                port = Port,
-            };
+                if (_serverPort == value) return;
+                _serverPort = value;
+                OnPropertyChanged(nameof(ServerPort));
+            }
+        }
 
-            var jsonString = JsonConvert.SerializeObject(json, (Formatting) System.Xml.Formatting.Indented);
-            File.WriteAllText(ConfigFileName, jsonString);
+        public string GameExe
+        {
+            get => _gameExe;
+            set
+            {
+                if (_gameExe == null || _gameExe == value) return;
+                _gameExe = value;
+                OnPropertyChanged(nameof(GameExe));
+            }
         }
     }
 }

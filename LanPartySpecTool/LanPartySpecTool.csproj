@@ -70,12 +70,15 @@
     <Compile Include="agent\Executor.cs" />
     <Compile Include="agent\SocketClient.cs" />
     <Compile Include="config\Configuration.cs" />
+    <Compile Include="config\ConfigurationManager.cs" />
     <Compile Include="config\Defaults.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="LanPartySpecTool.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="protocol\Command.cs" />
     <Compile Include="protocol\CommandAction.cs" />
     <Compile Include="protocol\CommandParser.cs" />
+    <Compile Include="utility\GameUtility.cs" />
     <Compile Include="utility\StoppableThread.cs" />
     <Compile Include="windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -86,15 +89,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

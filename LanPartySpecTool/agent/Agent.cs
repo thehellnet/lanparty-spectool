@@ -103,9 +103,9 @@ namespace LanPartySpecTool.agent
                 return;
             }
 
-            Logger.Debug($"Starting socket on port {_configuration.Port}");
+            Logger.Debug($"Starting socket on port {_configuration.ServerPort}");
 
-            var ipEndPoint = new IPEndPoint(IPAddress.Any, _configuration.Port);
+            var ipEndPoint = new IPEndPoint(IPAddress.Any, _configuration.ServerPort);
 
             _socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
             _socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
