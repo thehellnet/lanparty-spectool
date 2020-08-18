@@ -1,8 +1,10 @@
-﻿<Window x:Class="LanPartySpecTool.windows.MainWindow"
+﻿<!-- ReSharper disable once Xaml.RedundantNamespaceAlias -->
+<Window x:Class="LanPartySpecTool.windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:LanPartySpecTool.windows"
         mc:Ignorable="d"
         Title="MainWindow" Height="480" Width="848" MinWidth="848" MinHeight="480">
     <Grid>
@@ -61,13 +63,16 @@
                         HorizontalAlignment="Right" Width="120" />
                 <Label Content="Game EXE" HorizontalAlignment="Left" Margin="10,41,0,0"
                        VerticalAlignment="Top" />
-                <TextBox x:Name="GameExe" Margin="105,41,135,0" TextWrapping="Wrap"
+                <TextBox x:Name="GameExe" Margin="105,41,166,0"
                          Text="C:\iw3mp.exe"
-                         VerticalAlignment="Top"
-                         Height="26" />
+                         TextWrapping="Wrap" IsReadOnly="True"
+                         Height="26" VerticalAlignment="Top" />
+                <Button Click="GameExeChooseButton_OnClick" Content="..."
+                        Margin="0,41,135,0" VerticalAlignment="Top"
+                        Height="26" Width="26" HorizontalAlignment="Right" />
                 <Button Click="ShowCodKeyButton_OnClick" Content="Show CodKey"
-                        Margin="0,41,10,0" VerticalAlignment="Top" Height="26"
-                        HorizontalAlignment="Right" Width="120" />
+                        Margin="0,41,10,0" VerticalAlignment="Top"
+                        Height="26" Width="120" HorizontalAlignment="Right" />
             </Grid>
         </GroupBox>
     </Grid>

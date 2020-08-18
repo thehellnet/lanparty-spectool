@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,13 +11,17 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using LanPartySpecTool.config;
 using LanPartySpecTool.utility;
+using log4net;
 using log4net.Core;
+using Microsoft.Win32;
 
 namespace LanPartySpecTool.windows
 {
     public partial class MainWindow
     {
         private const int MaxLogLines = 100;
+
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(MainWindow));
 
         private readonly Configuration _configuration;
         private readonly DispatcherTimer _clockTimer = new DispatcherTimer();
@@ -183,6 +188,31 @@ namespace LanPartySpecTool.windows
             var codKey = GameUtility.ReadCodKey();
             var message = $"Key configured in registry: {GameUtility.FormatCodKey(codKey)}";
             MessageBox.Show(message, "Configured key", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void GameExeChooseButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var filter = "CoD4 MultiPlayer|iw3mp.exe|Executable (*.exe)|*.exe|All files (*.*)|*.*";
+            var initialDirectory = Path.GetDirectoryName(_configuration.GameExe) ?? "";
+
+            var dialog = new OpenFileDialog
+            {
+                Title = "Choose game EXE",
+                Filter = filter,
+                Multiselect = false,
+                ValidateNames = true,
+                InitialDirectory = initialDirectory,
+                CheckFileExists = true
+            };
+
+            if (dialog.ShowDialog(this) != true)
+            {
+                return;
+            }
+
+            var fileName = dialog.FileName;
+            Logger.Info($"Updating Game EXE: {fileName}");
+            _configuration.GameExe = fileName;
         }
     }
 }
